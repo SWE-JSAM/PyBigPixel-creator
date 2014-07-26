@@ -1,4 +1,4 @@
-#pyBigPixel Creator
+#PyBigPixel Creator
 ---
 With PyBigPixel Creator software you can easily make big pixel art from you digital images. This images could also be use for:
 
