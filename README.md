@@ -7,6 +7,8 @@ With PyBigPixel Creator software you can easily make big pixel art from you digi
 * Quilt patches designs
 * Bead plate templates for making advanced bead plates
 
+![Screen shoot](https://github.com/SWE-JSAM/PyBigPixel-creator/blob/master/raw_files/PyBigPixel_screenshoot.png)
+
 ## Run the program
 Check dependencies, see below, prior executing the program.
 
