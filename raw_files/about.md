@@ -28,11 +28,3 @@ In the settings menu you can change some default settings.
 * pillow (have tested 2.5.0) [pillow home page](http://pillow.readthedocs.org/en/latest/)
 * PyQt5 (have tested 5.3.1) [PyQt5 home page](http://pyqt.sourceforge.net/Docs/PyQt5/index.html)
 * Have only tested on Linux. Please report issues if you are running outer platforms.
-
-## Planed features
-
-* Improve code: This is my first pyqt project.
-* Add support for different pixel layouts: hexagons, rectangles and crosses for cross stitches
-* Add Swedish languish support
-* Make a setup script
-* make resources files 
