@@ -1,5 +1,5 @@
 '''
-PyPixel Creator software converts your digital images to pixel patterns.
+PyBigPixel Creator software converts your digital images to pixel patterns.
 '''
 import sys
 import os
@@ -22,7 +22,7 @@ class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
         self.printer = QPrinter()
-        self.window_title = "PyPixel Creator {0}".format(_version)
+        self.window_title = "PyBigPixel Creator {0}".format(_version)
         self.pixel = PixDrawing()
         self.qpixmap_image = None
         self.qpixmap_pixel = None
@@ -136,14 +136,14 @@ class Window(QMainWindow):
         self.qpixmap_image = QPixmap(self.inImage_name)
         self.label_image.setPixmap(self.qpixmap_image)
         self.refresh_plate()
-        self.window_title = "PyPixel Creator {0} -- Untitled pattern".format(_version)
+        self.window_title = "PyBigPixel Creator {0} -- Untitled pattern".format(_version)
         self.setWindowTitle(self.window_title)
         self.dirty = True
         self.updatescreensize()
 
     def save_file(self):
         if self.inImage_name:
-            saveFileName = QFileDialog.getSaveFileName(self, "PyPixel Creator {0}"
+            saveFileName = QFileDialog.getSaveFileName(self, "PyBigPixel Creator {0}"
                                                        " -- Save Images"
                                                        .format(_version), '',
                                                        ".bmp")
@@ -154,7 +154,7 @@ class Window(QMainWindow):
 
             self.pixel.pix_img.save(file)
             self.dirty = False
-            self.window_title = "PyPixel Creator {0} -- {1}".format(_version, file[:-4].split('/')[-1])
+            self.window_title = "PyBigPixel Creator {0} -- {1}".format(_version, file[:-4].split('/')[-1])
             self.setWindowTitle(self.window_title)
         else:
             QMessageBox.warning(self, "Save Error!",
@@ -182,7 +182,7 @@ class Window(QMainWindow):
 
     def close(self):
         if self.dirty:
-            close_question = QMessageBox.question(self, "PyPixel Creator {0}"
+            close_question = QMessageBox.question(self, "PyBigPixel Creator {0}"
                                                        " -- Save Images"
                                                        .format(_version),
                                                   "File has unsaved changes."
@@ -243,7 +243,7 @@ class AbouteInfo(QDialog):
         layout.addWidget(self.text)
         layout.addLayout(buttonlayout)
         self.setLayout(layout)
-        self.setWindowTitle("PyPixel Creator {0}-- {1}".format(_version, name))
+        self.setWindowTitle("PyBigPixel Creator {0}-- {1}".format(_version, name))
         self.cancelbutton.clicked.connect(self.close)
 
 
@@ -255,14 +255,14 @@ class Settings(QDialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         # Make reference copy of variables
         self.shape = shape
-        self.setWindowTitle("PyPixel Creator {0}-- {1}"
+        self.setWindowTitle("PyBigPixel Creator {0}-- {1}"
                             .format(_version, 'Settings'))
 
         shape_label = QLabel("Shape of pixel")
         self.shape_list = QComboBox()
         self.shape_list.addItems(self.shape['available_shapes'])
         self.shape_list.setCurrentIndex(self.shape_list.findText(self.shape['shape']))
-        plate_label = QLabel("Number of PyPixel Creators"
+        plate_label = QLabel("Number of PyBigPixel Creators"
                              "used (width x height)")
         plate_label_x = QLabel(" X ")
         self.pixel_button_width = QSpinBox()
