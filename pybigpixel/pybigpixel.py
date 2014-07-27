@@ -1,10 +1,11 @@
 '''
 PyBigPixel Creator software converts your digital images to pixel patterns.
+This module contains the GUI 
 '''
 import sys
 import os
 
-from PyQt5.QtGui import (QPixmap, QPainter, QTransform)
+from PyQt5.QtGui import (QPixmap, QPainter, QTransform, QKeySequence)
 from PyQt5.QtCore import (pyqtSignal, Qt)
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
                              QHBoxLayout, QLabel, QWidget, QFrame, QFileDialog,
@@ -14,7 +15,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
 from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from plate import PixDrawing
-_version = "0.1"
+__version__ = "0.1"
 
 
 class Window(QMainWindow):
@@ -22,7 +23,7 @@ class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
         self.printer = QPrinter()
-        self.window_title = "PyBigPixel Creator {0}".format(_version)
+        self.window_title = "PyBigPixel Creator {0}".format(__version__)
         self.pixel = PixDrawing()
         self.qpixmap_image = None
         self.qpixmap_pixel = None
@@ -31,7 +32,7 @@ class Window(QMainWindow):
                                                    'filled squares', 'cross'),
                               'pixels': [30, 30]}
 
-        self.inImage_name = 'data/start_background.png'
+        self.inImage_name = 'data/images/start_background.png'
         self.ui()
         self.load_file()
         self.dirty = False
@@ -41,19 +42,25 @@ class Window(QMainWindow):
         menubar.setNativeMenuBar(True)  # make the menu bar OS specific
 
         bar_file = menubar.addMenu("&File")
-        file_load = QAction("&Load image", self)
-        file_load.setShortcut("Ctrl+N")
 
-        file_save = QAction("&Save plate", self)
-        file_save.setShortcut("Ctrl+S")
+        file_load = QAction("&Load image", self, shortcut=QKeySequence.New,
+                            statusTip="Load a new image",
+                            triggered=self.open_file)
 
-        file_print = QAction("&Print", self)
-        file_print.setShortcut("Ctrl+P")
+        file_save = QAction("&Save plate", self, shortcut=QKeySequence.Save,
+                            statusTip="Save the pattern",
+                            triggered=self.save_file)
 
-        file_settings = QAction("S&ettings", self)
+        file_print = QAction("&Print", self, shortcut=QKeySequence.Print,
+                            statusTip="Print pixel pattern",
+                            triggered=self.print_file)
 
-        file_quit = QAction("&Quit", self)
-        file_quit.setShortcut("Ctrl+Q")
+        file_settings = QAction("S&ettings", self, statusTip='Change settings',
+                                triggered=self.change_settings)
+
+        file_quit = QAction("&Quit", self, shortcut=QKeySequence.Quit,
+                            statusTip='Quit the program',
+                            triggered=self.close)
 
         bar_file.addAction(file_load)
         bar_file.addAction(file_save)
@@ -62,9 +69,15 @@ class Window(QMainWindow):
         bar_file.addAction(file_quit)
 
         bar_about = menubar.addMenu("&About")
-        about_about = QAction("&About", self)
-        about_licence = QAction("&Licence", self)
-        about_QT = QAction("About &QT", self)
+        about_about = QAction("&About", self, statusTip="Show about PyBigPix",
+                              triggered=self.show_about)
+
+        about_licence = QAction("&License", self, statusTip='Show license',
+                                triggered=self.show_license)
+
+        about_QT = QAction("About &QT", self, statusTip="Show about QT",
+                           triggered=qApp.aboutQt)
+
         bar_about.addAction(about_about)
         bar_about.addAction(about_licence)
         bar_about.addAction(about_QT)
@@ -95,16 +108,6 @@ class Window(QMainWindow):
         layout.addWidget(self.lable_pixels)
         self.setCentralWidget(self.centeralwidget)
 
-        file_load.triggered.connect(self.open_file)
-        file_save.triggered.connect(self.save_file)
-        file_print.triggered.connect(self.print_file)
-        file_settings.triggered.connect(self.change_settings)
-        file_quit.triggered.connect(self.close)
-
-        about_about.triggered.connect(self.show_about)
-        about_licence.triggered.connect(self.show_license)
-        about_QT.triggered.connect(qApp.aboutQt)
-
     def resizeEvent(self, event):
         scaledSize = self.label_image.size()
         scaledSize.scale(self.label_image.size(), Qt.KeepAspectRatio)
@@ -124,19 +127,23 @@ class Window(QMainWindow):
                                     Qt.SmoothTransformation))
 
     def open_file(self):
-        name = QFileDialog.getOpenFileNames(self, "Open Images",
-                                                    os.path.expanduser("~"),
-                                                    "Images (*.png *.jpg *.bmp"
-                                                    " *.tif);;All Files (*)")
-        self.inImage_name = name[0][0]
-        self.load_file()
+        filename, _ = QFileDialog.getOpenFileNames(self,"Open Images",
+                                                      os.path.expanduser("~"),
+                                                      "Images (*.png *.jpg *.bmp"
+                                                      " *.tif);;All Files (*)")
+        # to handle cancel option
+        if filename:
+            self.inImage_name = filename[0]
+            self.load_file()
+        else:
+            pass
 
     def load_file(self):
         self.pixel.start_image = Image.open(self.inImage_name)
         self.qpixmap_image = QPixmap(self.inImage_name)
         self.label_image.setPixmap(self.qpixmap_image)
         self.refresh_plate()
-        self.window_title = "PyBigPixel Creator {0} -- Untitled pattern".format(_version)
+        self.window_title = "PyBigPixel Creator {0} -- Untitled pattern".format(__version__)
         self.setWindowTitle(self.window_title)
         self.dirty = True
         self.updatescreensize()
@@ -145,7 +152,7 @@ class Window(QMainWindow):
         if self.inImage_name:
             saveFileName = QFileDialog.getSaveFileName(self, "PyBigPixel Creator {0}"
                                                        " -- Save Images"
-                                                       .format(_version), '',
+                                                       .format(__version__), '',
                                                        ".bmp")
             if saveFileName[0][-4:] == ".bmp":
                 file = saveFileName[0]
@@ -154,7 +161,7 @@ class Window(QMainWindow):
 
             self.pixel.pix_img.save(file)
             self.dirty = False
-            self.window_title = "PyBigPixel Creator {0} -- {1}".format(_version, file[:-4].split('/')[-1])
+            self.window_title = "PyBigPixel Creator {0} -- {1}".format(__version__, file[:-4].split('/')[-1])
             self.setWindowTitle(self.window_title)
         else:
             QMessageBox.warning(self, "Save Error!",
@@ -184,7 +191,7 @@ class Window(QMainWindow):
         if self.dirty:
             close_question = QMessageBox.question(self, "PyBigPixel Creator {0}"
                                                        " -- Save Images"
-                                                       .format(_version),
+                                                       .format(__version__),
                                                   "File has unsaved changes."
                                                   " Save now?",
                                                   QMessageBox.Yes |
@@ -200,11 +207,11 @@ class Window(QMainWindow):
             QWidget.close(self)
 
     def show_about(self):
-        about = AbouteInfo('data/about.html', 'About')
+        about = AbouteInfo('data/text/about.html', 'About')
         about.exec_()
 
     def show_license(self):
-        licence = AbouteInfo('data/gpl.html', 'License')
+        licence = AbouteInfo('data/text/gpl.html', 'License')
         licence.exec_()
 
     def refresh_plate(self):
@@ -243,7 +250,7 @@ class AbouteInfo(QDialog):
         layout.addWidget(self.text)
         layout.addLayout(buttonlayout)
         self.setLayout(layout)
-        self.setWindowTitle("PyBigPixel Creator {0}-- {1}".format(_version, name))
+        self.setWindowTitle("PyBigPixel Creator {0}-- {1}".format(__version__, name))
         self.cancelbutton.clicked.connect(self.close)
 
 
@@ -256,7 +263,7 @@ class Settings(QDialog):
         # Make reference copy of variables
         self.shape = shape
         self.setWindowTitle("PyBigPixel Creator {0}-- {1}"
-                            .format(_version, 'Settings'))
+                            .format(__version__, 'Settings'))
 
         shape_label = QLabel("Shape of pixel")
         self.shape_list = QComboBox()
