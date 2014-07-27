@@ -22,6 +22,7 @@ In the settings menu you can change some default settings.
     * 'circles': circular pixels
     * 'squares': squarer pixels with some space between them (default)
     * 'filled squares' without any space between pixels
+    * 'cross': crosses that could be used for cross stitches
      
 ## Dependency's
 * Python 3.x, currently the program also work with Python 2.7 branch

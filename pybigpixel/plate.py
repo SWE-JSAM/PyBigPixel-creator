@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Created on Jul 15, 2014
-
-@author: jorgen
+This module transfer the image files to bigpixel files.
 '''
 
 from PIL import (Image, ImageDraw)
@@ -11,7 +9,7 @@ from PIL.ImageQt import ImageQt
 
 
 # TODO: The colors should be selected form available color maps/images
-def pix_color(pixel_data):
+def _pix_color(pixel_data):
     # This function returns the pixel color
     if len(pixel_data) == 4:
         if pixel_data[3] == 0:
@@ -36,7 +34,7 @@ class PixDrawing():
         self.startImageName = image_name
         self.start_image = Image.open(self.startImageName)
 
-    def topcentercrop(self, image):
+    def _topcentercrop(self, image):
         width, height = image.size
         if width / height != self.pixels_tot[0] / self.pixels_tot[1]:
         # find how to crop image
@@ -56,7 +54,7 @@ class PixDrawing():
             box_size = (0, 0, width, height)
         return image.crop(box_size)
 
-    def make_pix_drawing(self, crop):
+    def _make_pix_drawing(self, crop):
         image_out = Image.new('RGB', (self.pixels_tot[0] * 20,
                                       self.pixels_tot[1] * 20),
                               color='gray')
@@ -74,7 +72,7 @@ class PixDrawing():
                     y = y_pix * step + step / 2
 
                     draw.ellipse((x - radius, y - radius, x + radius, y + radius),
-                                 fill=pix_color(pix_fig.getpixel((x_pix, y_pix))))
+                                 fill=_pix_color(pix_fig.getpixel((x_pix, y_pix))))
 
         elif self.shape == 'squares':
             pix = step - 2
@@ -82,24 +80,36 @@ class PixDrawing():
                 for y_pix in range(self.pixels_tot[1]):
                     x, y = x_pix * step + 1, y_pix * step + 1
                     draw.rectangle((x, y, x + pix, y + pix),
-                                   fill=pix_color(pix_fig.getpixel((x_pix, y_pix))))
+                                   fill=_pix_color(pix_fig.getpixel((x_pix, y_pix))))
 
         elif self.shape == 'filled squares':
             for x_pix in range(self.pixels_tot[0]):
                 for y_pix in range(self.pixels_tot[1]):
                     x, y = x_pix * step + 1, y_pix * step + 1
                     draw.rectangle((x, y, x + step, y + step),
-                                   fill=pix_color(pix_fig.getpixel((x_pix, y_pix))))
+                                   fill=_pix_color(pix_fig.getpixel((x_pix, y_pix))))
+
+        elif self.shape == 'cross':
+            for x_pix in range(self.pixels_tot[0]):
+                for y_pix in range(self.pixels_tot[1]):
+                    x = x_pix * step
+                    y = y_pix * step
+                    draw.line([x + 2, y + 2, x + step - 2, y + step - 2],
+                              fill=_pix_color(pix_fig.getpixel((x_pix, y_pix))),
+                              width=3)
+                    draw.line([x -2 + step, y + 2, x + 2, y + step - 2],
+                              fill=_pix_color(pix_fig.getpixel((x_pix, y_pix))),
+                              width=3)
         del pix_fig
         image_out = ImageQt(image_out)
         return image_out
 
     def generate_pix_drawing(self):
-        crop = self.topcentercrop(self.start_image)
-        self.pix_img = self.make_pix_drawing(crop)
+        crop = self._topcentercrop(self.start_image)
+        self.pix_img = self._make_pix_drawing(crop)
 
 
 if __name__ == '__main__':
     plate = PixDrawing()
-    plate.load_image('python.png')
+    plate.load_image('../raw_files/PyBigPixel_screenshoot.png')
     plate.generate_pix_drawing()

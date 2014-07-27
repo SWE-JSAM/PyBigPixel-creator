@@ -28,7 +28,7 @@ class Window(QMainWindow):
         self.qpixmap_pixel = None
         self.settings_dict = {'shape': 'squares',
                               'available_shapes': ('circles', 'squares',
-                                                   'filled squares'),
+                                                   'filled squares', 'cross'),
                               'pixels': [30, 30]}
 
         self.inImage_name = 'data/start_background.png'
