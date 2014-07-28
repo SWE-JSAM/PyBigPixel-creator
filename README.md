@@ -19,13 +19,13 @@ Check dependencies, see below, prior executing the program.
 ## Settings menu
 In the settings menu you can change some default settings.
 
-* How many pixels should be used (default 30 x 30)
 * The pixel it self:
     * 'circles': circular pixels
     * 'squares': squarer pixels with some space between them (default)
     * 'filled squares' without any space between pixels
     * 'cross': crosses that could be used for cross stitches
-     
+* Background color: The background color could be selected from several different available backgrounds (default gray)
+* How many pixels should be used (default 30 x 30)     
 ## Dependency's
 * Python 3.x, currently the program also work with Python 2.7 branch
 * pillow (have tested 2.5.0) [pillow home page](http://pillow.readthedocs.org/en/latest/)
@@ -34,8 +34,8 @@ In the settings menu you can change some default settings.
 
 ## Planed features
 
-* Improve code: This is my first pyqt project.
-* Add support for different pixel layouts: hexagons, rectangles and crosses for cross stitches
+* Improve code base: This is my first PyQt5 project.
+* Add support for different pixel layouts: hexagons and rectangles
 * Add Swedish languish support
 * Make a setup script
 * make resources files 

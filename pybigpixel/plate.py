@@ -29,6 +29,7 @@ class PixDrawing():
         self.startImageName = None
         self.plateImage = None
         self.shape = 'squares'
+        self.background = 'gray'
 
     def load_image(self, image_name):
         self.startImageName = image_name
@@ -57,7 +58,7 @@ class PixDrawing():
     def _make_pix_drawing(self, crop):
         image_out = Image.new('RGB', (self.pixels_tot[0] * 20,
                                       self.pixels_tot[1] * 20),
-                              color='gray')
+                              color=self.background)
 
         draw = ImageDraw.Draw(image_out)
         pix_fig = crop.resize(self.pixels_tot)

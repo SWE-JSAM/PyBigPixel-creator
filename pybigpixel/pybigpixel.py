@@ -1,6 +1,6 @@
 '''
 PyBigPixel Creator software converts your digital images to pixel patterns.
-This module contains the GUI 
+This module contains the GUI
 '''
 import sys
 import os
@@ -27,9 +27,14 @@ class Window(QMainWindow):
         self.pixel = PixDrawing()
         self.qpixmap_image = None
         self.qpixmap_pixel = None
+        # all user settings in this dictionary
         self.settings_dict = {'shape': 'squares',
+                              'background': 'gray',
                               'available_shapes': ('circles', 'squares',
                                                    'filled squares', 'cross'),
+                              'availible_backgrounds': ('gray', 'white', 'red',
+                                                       'blue', 'green',
+                                                       'black'),
                               'pixels': [30, 30]}
 
         self.inImage_name = 'data/images/start_background.png'
@@ -127,10 +132,10 @@ class Window(QMainWindow):
                                     Qt.SmoothTransformation))
 
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileNames(self,"Open Images",
-                                                      os.path.expanduser("~"),
-                                                      "Images (*.png *.jpg *.bmp"
-                                                      " *.tif);;All Files (*)")
+        filename, _ = QFileDialog.getOpenFileNames(self, "Open Images",
+                                                   os.path.expanduser("~"),
+                                                  "Images (*.png *.jpg *.bmp"
+                                                  " *.tif);;All Files (*)")
         # to handle cancel option
         if filename:
             self.inImage_name = filename[0]
@@ -150,11 +155,9 @@ class Window(QMainWindow):
 
     def save_file(self):
         if self.inImage_name:
-            saveFileName = QFileDialog.getSaveFileName(self, "PyBigPixel Creator {0}"
-                                                       " -- Save Images"
-                                                       .format(__version__), '',
-                                                       ".bmp")
-            if saveFileName[0][-4:] == ".bmp":
+            title = "PyBigPixel Creator {0} -- Save Images".format(__version__)
+            saveFileName = QFileDialog.getSaveFileName(self, title, '', ".bmp")
+            if ".bmp" in saveFileName:
                 file = saveFileName[0]
             else:
                 file = saveFileName[0] + saveFileName[1]
@@ -222,9 +225,11 @@ class Window(QMainWindow):
             self.setWindowTitle(self.window_title)
 
         if self.inImage_name:
+            # load all data from the user settings to plate module
             self.pixel.load_image(self.inImage_name)
             self.pixel.shape = self.settings_dict['shape']
             self.pixel.pixels_tot = self.settings_dict['pixels']
+            self.pixel.background = self.settings_dict['background']
             self.pixel.generate_pix_drawing()
             self.qpixmap_pixel = QPixmap.fromImage(self.pixel.pix_img)
             self.lable_pixels.setPixmap(self.qpixmap_pixel)
@@ -268,7 +273,9 @@ class Settings(QDialog):
         shape_label = QLabel("Shape of pixel")
         self.shape_list = QComboBox()
         self.shape_list.addItems(self.shape['available_shapes'])
-        self.shape_list.setCurrentIndex(self.shape_list.findText(self.shape['shape']))
+        self.shape_list.setCurrentIndex(self.shape_list.
+                                        findText(self.shape['shape']))
+
         plate_label = QLabel("Number of PyBigPixel Creators"
                              "used (width x height)")
         plate_label_x = QLabel(" X ")
@@ -280,20 +287,31 @@ class Settings(QDialog):
         self.pixel_button_height.setRange(1, 250)
         self.pixel_button_height.setValue(self.shape['pixels'][1])
 
-        layout = QGridLayout()
-        layout.addWidget(shape_label, 0, 0)
-        layout.addWidget(self.shape_list, 0, 1)
-        layout.addWidget(plate_label, 1, 0)
-        layout.addWidget(self.pixel_button_width, 1, 1)
-        layout.addWidget(plate_label_x, 1, 2)
-        layout.addWidget(self.pixel_button_height, 1, 3)
+        self.background_label = QLabel("Background color")
+        self.background_list = QComboBox()
+        self.background_list.addItems(self.shape['availible_backgrounds'])
+        self.background_list.setCurrentIndex(self.background_list.
+                                             findText(self.shape['background']))
 
         button_layout = QVBoxLayout()
         buttonbox = QDialogButtonBox(QDialogButtonBox.Apply |
                                      QDialogButtonBox.Cancel)
         button_layout.addStretch()
         button_layout.addWidget(buttonbox)
-        layout.addLayout(button_layout, 2, 0, 2, 4)
+
+        layout = QGridLayout()
+        layout.addWidget(shape_label, 0, 0)
+        layout.addWidget(self.shape_list, 0, 2, 1, 2)
+
+        layout.addWidget(self.background_label, 1, 0)
+        layout.addWidget(self.background_list, 1, 2, 1, 2)
+
+        layout.addWidget(plate_label, 2, 0)
+        layout.addWidget(self.pixel_button_width, 2, 1, 1, 1)
+        layout.addWidget(plate_label_x, 2, 2)
+        layout.addWidget(self.pixel_button_height, 2, 3, 1, 1)
+
+        layout.addLayout(button_layout, 3, 0, 2, 4)
         self.setLayout(layout)
 
         buttonbox.rejected.connect(self.close)
@@ -303,6 +321,7 @@ class Settings(QDialog):
         self.shape['pixels'][0] = self.pixel_button_width.value()
         self.shape['pixels'][1] = self.pixel_button_height.value()
         self.shape['shape'] = self.shape_list.currentText()
+        self.shape['background'] = self.background_list.currentText()
         self.changed.emit()
 
 if __name__ == '__main__':
