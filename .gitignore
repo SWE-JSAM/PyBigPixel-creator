@@ -51,6 +51,3 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-
-# Help scripts
-run.py
