@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=PyBigPixel
+Comment=Simple application that converts images to pixel art.
+Exec=pybigpixel
+Icon=pybigpixel
+Terminal=false
+Type=Application
+Categories=Graphics

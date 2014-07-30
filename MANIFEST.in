@@ -1,0 +1,2 @@
+recursive-include pybigpixel/data *
+recursive-include extra *

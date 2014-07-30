@@ -1,7 +1,19 @@
-'''
-PyBigPixel Creator software converts your digital images to pixel patterns.
-This module contains the GUI
-'''
+# Authors: Jörgen Samuelsson <samuelssonjorgen@gmail.com>
+# PyBigPixel Creator software converts your digital images to pixel patterns.
+#
+# PyBigPixel Creator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PyBigPixel Creator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with PyBigPixel Creator. If not, see <http://www.gnu.org/licenses/gpl.html>.
+
 import sys
 import os
 
@@ -14,8 +26,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
                              QMessageBox, QSizePolicy, qApp, QComboBox)
 from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
-from plate import PixDrawing
-__version__ = "0.1"
+from . import plate
+
+__version__ = "0.1.5"
 
 
 class Window(QMainWindow):
@@ -24,7 +37,7 @@ class Window(QMainWindow):
         super(Window, self).__init__()
         self.printer = QPrinter()
         self.window_title = "PyBigPixel Creator {0}".format(__version__)
-        self.pixel = PixDrawing()
+        self.pixel = plate.PixDrawing()
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
@@ -37,7 +50,10 @@ class Window(QMainWindow):
                                                        'black'),
                               'pixels': [30, 30]}
 
-        self.inImage_name = 'data/images/start_background.png'
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.inImage_name = os.path.join(self.base_dir, 'data', 'images',
+                                         'start_background.png')
+
         self.ui()
         self.load_file()
         self.dirty = False
@@ -210,11 +226,13 @@ class Window(QMainWindow):
             QWidget.close(self)
 
     def show_about(self):
-        about = AbouteInfo('data/text/about.html', 'About')
+        about = AbouteInfo(os.path.join(self.base_dir, 'data', 'text',
+                                        'about.html'), 'About')
         about.exec_()
 
     def show_license(self):
-        licence = AbouteInfo('data/text/gpl.html', 'License')
+        licence = AbouteInfo(os.path.join(self.base_dir, 'data', 'text',
+                                          'gpl.html'), 'License')
         licence.exec_()
 
     def refresh_plate(self):
@@ -324,8 +342,12 @@ class Settings(QDialog):
         self.shape['background'] = self.background_list.currentText()
         self.changed.emit()
 
-if __name__ == '__main__':
+
+def main():
     app = QApplication(sys.argv)
     window = Window()
     window.show()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
