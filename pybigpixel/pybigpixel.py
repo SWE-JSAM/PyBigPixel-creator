@@ -18,7 +18,7 @@ import sys
 import os
 
 from PyQt5.QtGui import (QPixmap, QPainter, QTransform, QKeySequence)
-from PyQt5.QtCore import (pyqtSignal, Qt)
+from PyQt5.QtCore import (pyqtSignal, Qt, QLocale, QTranslator)
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
                              QHBoxLayout, QLabel, QWidget, QFrame, QFileDialog,
                              QDialog, QTextBrowser, QPushButton, QVBoxLayout,
@@ -27,8 +27,8 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
 from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from . import plate
-
-__version__ = "0.1.5"
+from . import  prepare
+__version__ = "0.2.0"
 
 
 class Window(QMainWindow):
@@ -41,15 +41,21 @@ class Window(QMainWindow):
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
-        self.settings_dict = {'shape': 'squares',
-                              'background': 'gray',
-                              'available_shapes': ('circles', 'squares',
-                                                   'filled squares', 'cross'),
-                              'availible_backgrounds': ('gray', 'white', 'red',
-                                                       'blue', 'green',
-                                                       'black'),
+        self.settings_dict = {'shape': self.tr('squares'),
+                              'background': self.tr('gray'),
+                              'available_shapes': (self.tr('circles'),
+                                                   self.tr('squares'),
+                                                   self.tr('filled squares'),
+                                                   self.tr('cross')),
+                              'availible_backgrounds': (self.tr('gray'),
+                                                        self.tr('white'),
+                                                        self.tr('red'),
+                                                       self.tr('blue'),
+                                                       self.tr('green'),
+                                                       self.tr('black')),
                               'pixels': [30, 30]}
-
+        self.color = ('gray', 'white', 'red', 'blue', 'green', 'black')
+        self.shapes = ('circles', 'squares', 'filled squares', 'cross')
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.inImage_name = os.path.join(self.base_dir, 'data', 'images',
                                          'start_background.png')
@@ -250,9 +256,11 @@ class Window(QMainWindow):
         if self.inImage_name:
             # load all data from the user settings to plate module
             self.pixel.load_image(self.inImage_name)
-            self.pixel.shape = self.settings_dict['shape']
+            color_index = self.settings_dict['availible_backgrounds'].index(self.settings_dict['background'])
+            shape_index = self.settings_dict['available_shapes'].index(self.settings_dict['shape'])
+            self.pixel.shape = self.shapes[shape_index]
             self.pixel.pixels_tot = self.settings_dict['pixels']
-            self.pixel.background = self.settings_dict['background']
+            self.pixel.background = self.color[color_index]
             self.pixel.generate_pix_drawing()
             self.qpixmap_pixel = QPixmap.fromImage(self.pixel.pix_img)
             self.lable_pixels.setPixmap(self.qpixmap_pixel)
@@ -349,6 +357,15 @@ class Settings(QDialog):
 
 def main():
     app = QApplication(sys.argv)
+    prepare.configure()
+    locale = QLocale.system().name()
+    if locale in prepare.LANG.keys():
+        local_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                 'data', 'locale'))
+        print(os.listdir(local_dir))
+        translator = QTranslator()
+        translator.load(os.path.join(local_dir, 'pybigpixel_sv_SE.qm'))
+        app.installTranslator(translator)
     window = Window()
     window.show()
     sys.exit(app.exec_())

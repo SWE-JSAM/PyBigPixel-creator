@@ -4,8 +4,10 @@ With PyBigPixel Creator software you can easily make big pixel art from you digi
 
 * Tile art designs
 * Cross stitch designs
-* Quilt patches designs
-* Bead plate templates for making advanced bead plates
+* Quilt patches designs (hexagons coming soon)
+* Bead plate templates for making bead plates
+
+See **settings menu**, below, for supported pixels.
 
 ![Screen shoot](https://github.com/SWE-JSAM/PyBigPixel-creator/blob/master/raw_files/PyBigPixel_screenshoot.png)
 
@@ -37,6 +39,7 @@ In the settings menu you can change some default settings.
     * 'cross': crosses that could be used for cross stitches
 * Background color: The background color could be selected from several different available backgrounds (default gray)
 * How many pixels should be used (default 30 x 30)     
+
 ## Dependency's
 * Python 3.x, currently the program also work with Python 2.7 branch
 * pillow (have tested 2.5.0) [pillow home page](http://pillow.readthedocs.org/en/latest/)
@@ -47,12 +50,17 @@ In the settings menu you can change some default settings.
 
 ## Planed features
 
-* Improve code base: This is my first PyQt5 project.
-* Add support for different pixel layouts: hexagons and rectangles
-* Add Swedish languish support
-* make resources files 
+* Improve code base: This is my first PyQt5 project. If you have any suggestions about code improvement just contact me. 
+* Add support for additional pixel layouts: hexagons and rectangles
+* make resources files
+* Make some illustrations for the software
+* Linux packages for Arch Linux is planned
 
 ## Change log
+### Version 0.2.0
+* Add translation in code
+    *Added Swedish languish support
+ 
 #### Version 0.1.5
 
 * Added setup script for simpler installation/uninstall.
