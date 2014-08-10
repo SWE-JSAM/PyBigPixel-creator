@@ -27,13 +27,14 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QAction, QMenuBar,
 from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from . import plate
-from . import  prepare
-__version__ = "0.2.0"
+from . import prepare
+
+__version__ = "0.2.2"
 
 
 class Window(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, conf):
         super(Window, self).__init__()
         self.printer = QPrinter()
         self.window_title = "PyBigPixel Creator {0}".format(__version__)
@@ -41,8 +42,8 @@ class Window(QMainWindow):
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
-        self.settings_dict = {'shape': self.tr('squares'),
-                              'background': self.tr('gray'),
+        self.settings_dict = {'shape': '',
+                              'background': '',
                               'available_shapes': (self.tr('circles'),
                                                    self.tr('squares'),
                                                    self.tr('filled squares'),
@@ -53,16 +54,32 @@ class Window(QMainWindow):
                                                        self.tr('blue'),
                                                        self.tr('green'),
                                                        self.tr('black')),
-                              'pixels': [30, 30]}
+                              'pixels': [],
+                              'lang': ''}
+
         self.color = ('gray', 'white', 'red', 'blue', 'green', 'black')
         self.shapes = ('circles', 'squares', 'filled squares', 'cross')
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.inImage_name = os.path.join(self.base_dir, 'data', 'images',
                                          'start_background.png')
-
+        self.config_file = conf
+        self.configure_get()
         self.ui()
         self.load_file()
         self.dirty = False
+
+    def configure_get(self):
+        # Load settings from configuration file
+        data = self.config_file.read_config()
+        shape, background, width_pixels, height_pixels, lang, _ = data
+        self.settings_dict['pixels'] = [width_pixels, height_pixels]
+
+        back_ind = self.color.index(background)
+        self.settings_dict['background'] = self.settings_dict['availible_backgrounds'][back_ind]
+
+        shape_ind = self.shapes.index(shape)
+        self.settings_dict['shape'] = self.settings_dict['available_shapes'][shape_ind]
+        self.settings_dict['lang'] = lang
 
     def ui(self):
         menubar = QMenuBar()
@@ -214,10 +231,26 @@ class Window(QMainWindow):
             painter.setWindow(self.qpixmap_pixel.rect())
             painter.drawPixmap(0, 0, self.qpixmap_pixel)
 
+    def change_config(self):
+        color_index = self.settings_dict['availible_backgrounds'].index(self.settings_dict['background'])
+        shape_index = self.settings_dict['available_shapes'].index(self.settings_dict['shape'])
+        shape = self.shapes[shape_index]
+        width, height = self.settings_dict['pixels']
+        back_color = self.color[color_index]
+        lang = self.settings_dict['lang']
+        self.config_file.write_config(shape, back_color,  str(width),
+                                      str(height), lang, __version__)
+
     def change_settings(self):
         settings = Settings(self.settings_dict, self)
         settings.changed.connect(self.refresh_plate)
+        settings.changed.connect(self.change_config)
+        settings.langchanged.connect(self.change_lang)
         settings.show()
+
+    def change_lang(self):
+        QMessageBox.information(self, 'Information', 'Restart the program, to '
+                                        'activate languish changes')
 
     def close(self):
         if self.dirty:
@@ -292,14 +325,24 @@ class AbouteInfo(QDialog):
 
 class Settings(QDialog):
     changed = pyqtSignal()
+    langchanged = pyqtSignal()
 
     def __init__(self, shape, parent=None):
         super(Settings, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
-        # Make reference copy of variables
+        # Make reference copy of variable
         self.shape = shape
+
         self.setWindowTitle("PyBigPixel Creator {0}-- {1}"
                             .format(__version__, self.tr('Settings')))
+
+        lang_label = QLabel(self.tr("Languish"))
+        self.lang_list = QComboBox()
+        langs = [prepare.LANGUISH[key]['Lang'] for
+                 key in prepare.LANGUISH.keys()]
+        self.lang = shape['lang']
+        self.lang_list.addItems(langs)
+        self.lang_list.setCurrentIndex(self.lang_list.findText(self.lang))
 
         shape_label = QLabel(self.tr("Shape of pixel"))
         self.shape_list = QComboBox()
@@ -330,18 +373,21 @@ class Settings(QDialog):
         button_layout.addWidget(buttonbox)
 
         layout = QGridLayout()
-        layout.addWidget(shape_label, 0, 0)
-        layout.addWidget(self.shape_list, 0, 2, 1, 2)
+        layout.addWidget(lang_label, 0, 0)
+        layout.addWidget(self.lang_list, 0, 2, 1, 2)
 
-        layout.addWidget(self.background_label, 1, 0)
-        layout.addWidget(self.background_list, 1, 2, 1, 2)
+        layout.addWidget(shape_label, 1, 0)
+        layout.addWidget(self.shape_list, 1, 2, 1, 2)
 
-        layout.addWidget(plate_label, 2, 0)
-        layout.addWidget(self.pixel_button_width, 2, 1, 1, 1)
-        layout.addWidget(plate_label_x, 2, 2)
-        layout.addWidget(self.pixel_button_height, 2, 3, 1, 1)
+        layout.addWidget(self.background_label, 2, 0)
+        layout.addWidget(self.background_list, 2, 2, 1, 2)
 
-        layout.addLayout(button_layout, 3, 0, 2, 4)
+        layout.addWidget(plate_label, 3, 0)
+        layout.addWidget(self.pixel_button_width, 3, 1, 1, 1)
+        layout.addWidget(plate_label_x, 3, 2)
+        layout.addWidget(self.pixel_button_height, 3, 3, 1, 1)
+
+        layout.addLayout(button_layout, 4, 0, 2, 4)
         self.setLayout(layout)
 
         buttonbox.rejected.connect(self.close)
@@ -352,21 +398,42 @@ class Settings(QDialog):
         self.shape['pixels'][1] = self.pixel_button_height.value()
         self.shape['shape'] = self.shape_list.currentText()
         self.shape['background'] = self.background_list.currentText()
+        if self.lang_list.currentText() != self.lang:
+            self.shape['lang'] = self.lang_list.currentText()
+            self.langchanged.emit()
         self.changed.emit()
 
 
 def main():
     app = QApplication(sys.argv)
-    prepare.configure()
     locale = QLocale.system().name()
-    if locale in prepare.LANG.keys():
-        local_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                 'data', 'locale'))
-        print(os.listdir(local_dir))
-        translator = QTranslator()
-        translator.load(os.path.join(local_dir, 'pybigpixel_sv_SE.qm'))
-        app.installTranslator(translator)
-    window = Window()
+    conf = prepare.Config()
+    local_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             'data', 'locale'))
+    translator = QTranslator()
+
+    if not os.path.isfile(conf.config_file):
+        if locale in prepare.LANGUISH.keys():
+            conf.write_config('squares', 'gray', 30, 30,
+                              prepare.LANGUISH[locale]['Lang'], __version__)
+            translator.load(os.path.join(local_dir, 'pybigpixel_' +
+                                         locale + '.qm'))
+            app.installTranslator(translator)
+
+        else:
+            conf.write_config('squares', 'gray', 30, 30, 'English',
+                              __version__)
+
+    else:
+        key = [key for key in prepare.LANGUISH.keys() if
+               prepare.LANGUISH[key]['Lang'] == conf.get_languish()]
+
+        if key[0] != 'default':
+            translator.load(os.path.join(local_dir, 'pybigpixel_' +
+                                         key[0] + '.qm'))
+            app.installTranslator(translator)
+
+    window = Window(conf)
     window.show()
     sys.exit(app.exec_())
 
