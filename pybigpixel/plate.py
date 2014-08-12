@@ -26,6 +26,10 @@ from PIL import (Image, ImageDraw)
 from PIL.ImageQt import ImageQt
 
 
+<<<<<<< HEAD
+=======
+# TODO: The colors should be selected form available color maps/images
+>>>>>>> c54f893734d170e94358a664180abff7367801f1
 def _pix_color(pixel_data, color_plallet=None):
     # This function returns the pixel color
     if len(pixel_data) == 4 and pixel_data[3] == 0:
@@ -36,10 +40,16 @@ def _pix_color(pixel_data, color_plallet=None):
         return (pixel_data[0], pixel_data[1], pixel_data[2])
 
 
+<<<<<<< HEAD
 # TODO: The colors should be selected form available color maps/images
 # issues with color selection nearest color
 def _closes_color(pix_color, color_pallet):
     # closes color will find a color closest to the pixel data
+=======
+def _closes_color(pix_color, color_pallet):
+    # closes color will find a color closest to the pixel data
+
+>>>>>>> c54f893734d170e94358a664180abff7367801f1
     dist = []
     for color in color_pallet:
         dist.append(math.sqrt(((pix_color[0] - color[0]) * 0.3) ** 2 +
