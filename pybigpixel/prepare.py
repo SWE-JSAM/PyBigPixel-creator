@@ -40,11 +40,12 @@ class Config(object):
         height_pixels = int(com['height_pixels'])
         languish = str(com['languish'])
         version = str(com['version'])
+        colormap = str(com['color_map'])
         return (shape, background, width_pixels, height_pixels, languish,
-                version)
+                version, colormap)
 
     def write_config(self, shape, background, width_pixels, height_pixels,
-                     languish, version):
+                     languish, version, color_map):
         self.config['Common'] = {}
         com = self.config['Common']
         com['shape'] = str(shape)
@@ -53,6 +54,7 @@ class Config(object):
         com['height_pixels'] = str(height_pixels)
         com['languish'] = str(languish)
         com['version'] = str(version)
+        com['color_map'] = str(color_map)
         with open(self.config_file, 'w') as configfile:
             self.config.write(configfile)
 
@@ -65,6 +67,5 @@ class Config(object):
 
 if __name__ == '__main__':
     conf = Config()
-    conf.write_config('squares', 'gray', '30', '30', 'English', '0.2.2')
+    conf.write_config('squares', 'gray', '30', '30', 'Swedish', '0.2.2', 'None')
     print(conf.read_config())
-    print(conf.get_languish())

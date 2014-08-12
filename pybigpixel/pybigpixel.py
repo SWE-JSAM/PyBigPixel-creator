@@ -39,6 +39,12 @@ class Window(QMainWindow):
         self.printer = QPrinter()
         self.window_title = "PyBigPixel Creator {0}".format(__version__)
         self.pixel = plate.PixDrawing()
+        # TODO: temporary test
+        self.pixel.color_map['RGB'] = ((255, 0, 0), (0, 0, 255), (0, 255, 0),
+                                       (255, 255, 0), (255, 0, 255),
+                                       (0, 255, 255), (139, 69, 19),
+                                       (222, 184, 135), (255, 255, 255),
+                                       (0, 0, 0), (60, 60, 60))
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
@@ -55,7 +61,8 @@ class Window(QMainWindow):
                                                        self.tr('green'),
                                                        self.tr('black')),
                               'pixels': [],
-                              'lang': ''}
+                              'lang': '',
+                              'color_map': ''}
 
         self.color = ('gray', 'white', 'red', 'blue', 'green', 'black')
         self.shapes = ('circles', 'squares', 'filled squares', 'cross')
@@ -71,7 +78,7 @@ class Window(QMainWindow):
     def configure_get(self):
         # Load settings from configuration file
         data = self.config_file.read_config()
-        shape, background, width_pixels, height_pixels, lang, _ = data
+        shape, background, width_pixels, height_pixels, lang, _, color_map = data
         self.settings_dict['pixels'] = [width_pixels, height_pixels]
 
         back_ind = self.color.index(background)
@@ -80,6 +87,7 @@ class Window(QMainWindow):
         shape_ind = self.shapes.index(shape)
         self.settings_dict['shape'] = self.settings_dict['available_shapes'][shape_ind]
         self.settings_dict['lang'] = lang
+        self.settings_dict['color_map'] = color_map
 
     def ui(self):
         menubar = QMenuBar()
@@ -102,9 +110,13 @@ class Window(QMainWindow):
                              statusTip=self.tr("Print pixel pattern"),
                              triggered=self.print_file)
 
-        file_settings = QAction(self.tr("S&ettings"), self,
-                                statusTip=self.tr('Change settings'),
-                                triggered=self.change_settings)
+        file_settings_general = QAction(self.tr("S&ettings"), self,
+                                        statusTip=self.tr('Change settings'),
+                                        triggered=self.change_settings)
+
+        file_settings_color = QAction(self.tr("Color map"), self,
+                                      statusTip=self.tr('Define color map'),
+                                      triggered=self.change_settings_color)
 
         file_quit = QAction(self.tr("&Quit"), self, shortcut=QKeySequence.Quit,
                             statusTip=self.tr('Quit the program'),
@@ -113,7 +125,8 @@ class Window(QMainWindow):
         bar_file.addAction(file_load)
         bar_file.addAction(file_save)
         bar_file.addAction(file_print)
-        bar_file.addAction(file_settings)
+        bar_file.addAction(file_settings_general)
+        bar_file.addAction(file_settings_color)
         bar_file.addAction(file_quit)
 
         bar_about = menubar.addMenu(self.tr("&About"))
@@ -247,6 +260,12 @@ class Window(QMainWindow):
         settings.changed.connect(self.change_config)
         settings.langchanged.connect(self.change_lang)
         settings.show()
+
+    # TODO: This function should make i possible to select predefined color
+    # maps and make own color maps. The color maps should be saved in
+    # configuration file
+    def change_settings_color(self):
+        pass
 
     def change_lang(self):
         QMessageBox.information(self, 'Information', 'Restart the program, to '
