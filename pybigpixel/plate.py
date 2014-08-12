@@ -26,10 +26,6 @@ from PIL import (Image, ImageDraw)
 from PIL.ImageQt import ImageQt
 
 
-<<<<<<< HEAD
-=======
-# TODO: The colors should be selected form available color maps/images
->>>>>>> c54f893734d170e94358a664180abff7367801f1
 def _pix_color(pixel_data, color_plallet=None):
     # This function returns the pixel color
     if len(pixel_data) == 4 and pixel_data[3] == 0:
@@ -40,22 +36,40 @@ def _pix_color(pixel_data, color_plallet=None):
         return (pixel_data[0], pixel_data[1], pixel_data[2])
 
 
-<<<<<<< HEAD
-# TODO: The colors should be selected form available color maps/images
-# issues with color selection nearest color
 def _closes_color(pix_color, color_pallet):
     # closes color will find a color closest to the pixel data
-=======
-def _closes_color(pix_color, color_pallet):
-    # closes color will find a color closest to the pixel data
-
->>>>>>> c54f893734d170e94358a664180abff7367801f1
+    pix_color = _RGB_to_HSL(pix_color)
     dist = []
-    for color in color_pallet:
-        dist.append(math.sqrt(((pix_color[0] - color[0]) * 0.3) ** 2 +
-                               ((pix_color[1] - color[1]) * 0.59) ** 2 +
-                               ((pix_color[2] - color[2]) * 0.11) ** 2))
-    return color_pallet[dist.index(min(dist))]
+    for color in color_pallet['HSL']:
+        dist.append(math.sqrt((pix_color[0] - color[0]) ** 2 +
+                               (pix_color[1] - color[1]) ** 2 +
+                               (pix_color[2] - color[2]) ** 2))
+    return color_pallet['RGB'][dist.index(min(dist))]
+
+
+def _RGB_to_HSL(color):
+    # see www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
+
+    r, g, b = (color[0] / 255, color[1] / 255, color[2] / 255)
+    min_rgb = min((r, g, b))
+    max_rgb = max((r, g, b))
+    L = (min_rgb + max_rgb) / 2
+
+    if max_rgb == min_rgb:
+        H, S = 0, 0
+    else:
+        if L > 0.5:
+            S = (max_rgb - min_rgb) / (2 - max_rgb - min_rgb)
+        else:
+            S = (max_rgb - min_rgb) / (max_rgb + min_rgb)
+
+        if r == max_rgb:
+            H = (g - b) / (max_rgb - min_rgb)
+        elif g == max_rgb:
+            H = 2 + (b - r) / (max_rgb - min_rgb)
+        else:
+            H = 4 + (r - g) / (max_rgb - min_rgb)
+    return (H, S, L)
 
 
 class PixDrawing():
@@ -68,7 +82,7 @@ class PixDrawing():
         self.plateImage = None
         self.shape = 'squares'
         self.background = 'gray'
-        self.pallet = None
+        self.pallet = {}
 
     def load_image(self, image_name):
         self.startImageName = image_name
@@ -103,6 +117,11 @@ class PixDrawing():
         pix_fig = crop.resize(self.pixels_tot)
         step = 20
 
+        if self.pallet:
+            if 'HSL' not in self.pallet.keys():
+                self.pallet['HSL'] = tuple(_RGB_to_HSL(color) for color in self.pallet['RGB'])
+
+
         if self.shape == 'circles':
             radius = 9
 
@@ -113,7 +132,7 @@ class PixDrawing():
 
                     draw.ellipse((x - radius, y - radius, x +
                                   radius, y + radius),
-                                 fill=_pix_color(pix_fig.getpixel((x_pix,y_pix)),
+                                 fill=_pix_color(pix_fig.getpixel((x_pix, y_pix)),
                                                  self.pallet))
 
         elif self.shape == 'squares':
@@ -145,7 +164,7 @@ class PixDrawing():
                               fill=_pix_color(pix_fig.getpixel((x_pix, y_pix)),
                                               self.pallet), width=3)
         del pix_fig
-        image_out.show()  # to test
+#         image_out.show()  # uncomment this line to test
         image_out = ImageQt(image_out)
         return image_out
 
@@ -157,7 +176,7 @@ class PixDrawing():
 if __name__ == '__main__':
     plate = PixDrawing()
     plate.pixels_tot = [40, 40]
-    plate.pallet = ((255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 255),
-                    (255, 255, 0), (255, 0, 255), (0, 255, 255), (0, 0, 0))
+    plate.pallet['RGB'] = ((255, 0, 0), (0, 0, 255), (0, 255, 0),
+                           (255, 255, 255), (0, 0, 0))
     plate.load_image('test.jpg')
     plate.generate_pix_drawing()
