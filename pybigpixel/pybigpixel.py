@@ -28,6 +28,7 @@ from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from . import plate
 from . import prepare
+from .colormap import ColorMap
 
 __version__ = "0.2.2"
 
@@ -40,11 +41,7 @@ class Window(QMainWindow):
         self.window_title = "PyBigPixel Creator {0}".format(__version__)
         self.pixel = plate.PixDrawing()
         # TODO: temporary test
-        self.pixel.color_map['RGB'] = ((255, 0, 0), (0, 0, 255), (0, 255, 0),
-                                       (255, 255, 0), (255, 0, 255),
-                                       (0, 255, 255), (139, 69, 19),
-                                       (222, 184, 135), (255, 255, 255),
-                                       (0, 0, 0), (60, 60, 60))
+#         self.pixel.color_map['RGB'] = 
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
@@ -265,7 +262,8 @@ class Window(QMainWindow):
     # maps and make own color maps. The color maps should be saved in
     # configuration file
     def change_settings_color(self):
-        pass
+        cmap = ColorMap()
+        cmap.exec_()
 
     def change_lang(self):
         QMessageBox.information(self, 'Information', 'Restart the program, to '

@@ -16,9 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with PyBigPixel Creator. If not, see
 # <http://www.gnu.org/licenses/gpl.html>.
-from PyQt5.QtWidgets import (QDialog, QApplication, QComboBox, QHBoxLayout,
-                             QVBoxLayout, QDialogButtonBox)
+from PyQt5.QtWidgets import (QDialog, QApplication, QComboBox, QVBoxLayout,
+                             QDialogButtonBox, QLabel, QGridLayout)
 import sys
+
+COLORMAPS = {'8-Colors': ((255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 0),
+                          (255, 0, 255), (0, 255, 255), (0, 0, 0),
+                          (255, 255, 255)),
+             '5-Colors': ((255, 0, 0), (0, 0, 255), (0, 255, 0), (0, 0, 0),
+                          (255, 255, 255)),
+             'All': None,
+             'Black-White': ((0, 0, 0), (255, 255, 255)),
+             '6-Gray': ((0, 0, 0), (255, 255, 255), (50, 50, 50),
+                        (100, 100, 100), (150, 150, 150))}
+
 
 
 class ColorMap(QDialog):
@@ -27,18 +38,21 @@ class ColorMap(QDialog):
         self.ui()
 
     def ui(self):
+        select_label = QLabel(self.tr("Chose color map"))
         select = QComboBox()
-        select.addItems(('None', 'color'))
+        select.addItems(sorted(COLORMAPS.keys()))
 
-        layout = QHBoxLayout()
-        layout.addWidget(select)
+        layout = QGridLayout()
+
+        layout.addWidget(select_label, 0, 0)
+        layout.addWidget(select, 0, 2)
 
         button_layout = QVBoxLayout()
         buttonbox = QDialogButtonBox(QDialogButtonBox.Apply |
                                      QDialogButtonBox.Cancel)
         button_layout.addStretch()
         button_layout.addWidget(buttonbox)
-        layout.addLayout(button_layout)
+        layout.addLayout(button_layout, 2, 1, 1, 2)
         self.setLayout(layout)
         self.setWindowTitle(self.tr('Select color map'))
         buttonbox.rejected.connect(self.close)
