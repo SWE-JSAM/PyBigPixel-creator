@@ -26,11 +26,11 @@ from PIL import (Image, ImageDraw)
 from PIL.ImageQt import ImageQt
 
 
-def _pix_color(pixel_data, color_plallet=None):
+def _pix_color(pixel_data, color_plallet):
     # This function returns the pixel color
     if len(pixel_data) == 4 and pixel_data[3] == 0:
         return (255, 255, 255)
-    elif color_plallet:
+    elif color_plallet['RGB']:
         return _closes_color(pixel_data, color_plallet)
     else:
         return (pixel_data[0], pixel_data[1], pixel_data[2])
@@ -82,7 +82,7 @@ class PixDrawing():
         self.plateImage = None
         self.shape = 'squares'
         self.background = 'gray'
-        self.color_map = {}
+        self.color_map = {'RGB': None}
 
     def load_image(self, image_name):
         self.startImageName = image_name
@@ -117,10 +117,9 @@ class PixDrawing():
         pix_fig = crop.resize(self.pixels_tot)
         step = 20
 
-        if self.color_map:
+        if self.color_map['RGB']:
             if 'HSL' not in self.color_map.keys():
                 self.color_map['HSL'] = tuple(_RGB_to_HSL(color) for color in self.color_map['RGB'])
-
 
         if self.shape == 'circles':
             radius = 9
@@ -176,7 +175,7 @@ class PixDrawing():
 if __name__ == '__main__':
     plate = PixDrawing()
     plate.pixels_tot = [40, 40]
-    plate.color_map['RGB'] = ((255, 0, 0), (0, 0, 255), (0, 255, 0),
-                           (255, 255, 255), (0, 0, 0))
-    plate.load_image('test.jpg')
+#     plate.color_map['RGB'] = ((255, 0, 0), (0, 0, 255), (0, 255, 0),
+#                               (255, 255, 255), (0, 0, 0))
+    plate.load_image('data/images/start_background.png')
     plate.generate_pix_drawing()

@@ -16,9 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with PyBigPixel Creator. If not, see
 # <http://www.gnu.org/licenses/gpl.html>.
+
 from PyQt5.QtWidgets import (QDialog, QApplication, QComboBox, QVBoxLayout,
                              QDialogButtonBox, QLabel, QGridLayout)
 import sys
+from PyQt5.QtCore import pyqtSignal
+
 
 COLORMAPS = {'8-Colors': ((255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 0),
                           (255, 0, 255), (0, 255, 255), (0, 0, 0),
@@ -31,35 +34,46 @@ COLORMAPS = {'8-Colors': ((255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 0),
                         (100, 100, 100), (150, 150, 150))}
 
 
-
 class ColorMap(QDialog):
-    def __init__(self):
+    color_map_changed = pyqtSignal()
+
+    def __init__(self, settings_dict):
         super(ColorMap, self).__init__()
+        self.settings = settings_dict
         self.ui()
 
     def ui(self):
         select_label = QLabel(self.tr("Chose color map"))
-        select = QComboBox()
-        select.addItems(sorted(COLORMAPS.keys()))
+        self.select = QComboBox()
+        self.select.addItems(sorted(COLORMAPS.keys()))
+        self.select.setCurrentIndex(self.select.
+                                    findText(self.settings['color_map']))
 
         layout = QGridLayout()
-
         layout.addWidget(select_label, 0, 0)
-        layout.addWidget(select, 0, 2)
+        layout.addWidget(self.select, 0, 2)
 
         button_layout = QVBoxLayout()
         buttonbox = QDialogButtonBox(QDialogButtonBox.Apply |
                                      QDialogButtonBox.Cancel)
         button_layout.addStretch()
         button_layout.addWidget(buttonbox)
+
         layout.addLayout(button_layout, 2, 1, 1, 2)
+
         self.setLayout(layout)
         self.setWindowTitle(self.tr('Select color map'))
         buttonbox.rejected.connect(self.close)
+        buttonbox.button(QDialogButtonBox.Apply).clicked.connect(self.apply)
 
+    def apply(self):
+        if self.settings['color_map'] != self.select.currentText():
+            self.settings['color_map'] = self.select.currentText()
+            self.color_map_changed.emit()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = ColorMap()
+    test_dict = {'color_map': 'All'}
+    win = ColorMap(test_dict)
     win.show()
     sys.exit(app.exec_())

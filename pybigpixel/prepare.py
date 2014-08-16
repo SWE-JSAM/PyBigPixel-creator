@@ -67,5 +67,5 @@ class Config(object):
 
 if __name__ == '__main__':
     conf = Config()
-    conf.write_config('squares', 'gray', '30', '30', 'Swedish', '0.2.2', 'None')
+    conf.write_config('squares', 'gray', '30', '30', 'Swedish', '0.2.2', 'All')
     print(conf.read_config())

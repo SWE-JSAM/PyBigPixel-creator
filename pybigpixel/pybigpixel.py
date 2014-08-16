@@ -28,7 +28,7 @@ from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from . import plate
 from . import prepare
-from .colormap import ColorMap
+from colormap import ColorMap, COLORMAPS
 
 __version__ = "0.2.2"
 
@@ -40,8 +40,6 @@ class Window(QMainWindow):
         self.printer = QPrinter()
         self.window_title = "PyBigPixel Creator {0}".format(__version__)
         self.pixel = plate.PixDrawing()
-        # TODO: temporary test
-#         self.pixel.color_map['RGB'] = 
         self.qpixmap_image = None
         self.qpixmap_pixel = None
         # all user settings in this dictionary
@@ -248,8 +246,10 @@ class Window(QMainWindow):
         width, height = self.settings_dict['pixels']
         back_color = self.color[color_index]
         lang = self.settings_dict['lang']
+        color_map = self.settings_dict['color_map']
         self.config_file.write_config(shape, back_color,  str(width),
-                                      str(height), lang, __version__)
+                                      str(height), lang, __version__,
+                                      color_map)
 
     def change_settings(self):
         settings = Settings(self.settings_dict, self)
@@ -262,7 +262,9 @@ class Window(QMainWindow):
     # maps and make own color maps. The color maps should be saved in
     # configuration file
     def change_settings_color(self):
-        cmap = ColorMap()
+        cmap = ColorMap(self.settings_dict)
+        cmap.color_map_changed.connect(self.refresh_plate)
+        cmap.color_map_changed.connect(self.change_config)
         cmap.exec_()
 
     def change_lang(self):
@@ -309,6 +311,7 @@ class Window(QMainWindow):
             color_index = self.settings_dict['availible_backgrounds'].index(self.settings_dict['background'])
             shape_index = self.settings_dict['available_shapes'].index(self.settings_dict['shape'])
             self.pixel.shape = self.shapes[shape_index]
+            self.pixel.color_map['RGB'] = COLORMAPS[self.settings_dict['color_map']]
             self.pixel.pixels_tot = self.settings_dict['pixels']
             self.pixel.background = self.color[color_index]
             self.pixel.generate_pix_drawing()
@@ -432,14 +435,15 @@ def main():
     if not os.path.isfile(conf.config_file):
         if locale in prepare.LANGUISH.keys():
             conf.write_config('squares', 'gray', 30, 30,
-                              prepare.LANGUISH[locale]['Lang'], __version__)
+                              prepare.LANGUISH[locale]['Lang'], __version__,
+                              'All')
             translator.load(os.path.join(local_dir, 'pybigpixel_' +
                                          locale + '.qm'))
             app.installTranslator(translator)
 
         else:
             conf.write_config('squares', 'gray', 30, 30, 'English',
-                              __version__)
+                              __version__, 'All')
 
     else:
         key = [key for key in prepare.LANGUISH.keys() if
