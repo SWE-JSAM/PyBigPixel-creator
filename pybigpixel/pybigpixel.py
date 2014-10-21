@@ -28,7 +28,7 @@ from PyQt5.QtPrintSupport import (QPrintDialog, QPrinter)
 from PIL import (Image)
 from . import plate
 from . import prepare
-from colormap import ColorMap, COLORMAPS
+from .colormap import ColorMap, COLORMAPS
 
 __version__ = "0.2.2"
 
